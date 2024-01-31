@@ -17,66 +17,18 @@ import { useForm } from '@mantine/form';
 import { IconTrash } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 
-import { formATh, setDataForms } from '../app/formsSlice.ts';
+import { formATh, setDataForms } from '../../app/formsSlice.ts';
 import { yupResolver } from 'mantine-form-yup-resolver';
-import * as yup from 'yup';
-import { useAppDispatch } from '../app/hooks.ts';
+import { useAppDispatch } from '../../app/hooks.ts';
+import { randomId } from '@mantine/hooks';
+import { validateFormsSchema } from '../../utils/yup/validateSchema.ts';
+import { StepActive } from '../../utils/enum.ts';
+import { formsStyle } from './formsStyles.ts';
 
-export const Form: FC = () => {
-  const [active, setActive] = useState(0);
+export const Forms: FC = () => {
+  const [active, setActive] = useState<StepActive>(StepActive.Step1);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-
-  // yup
-  const validateSchema = yup.object().shape({
-    nickname: yup
-      .string()
-      .test(
-        'char-or-number',
-        () => `только буквы и цифры`,
-        (value) => value == null || /^[а-яА-Яa-zA-Z0-9]+$/.test(value),
-      )
-      .max(30, 'max 30 символов')
-      .required('обязательное поле'),
-    name: yup
-      .string()
-      .test(
-        'only char',
-        () => `только буквы`,
-        (value) => value == null || /^[а-яА-Яa-zA-Z]+$/.test(value),
-      )
-      .max(50, 'max 50 символов')
-      .required('обязательное поле'),
-    sername: yup
-      .string()
-      .test(
-        'only char',
-        () => `только буквы`,
-        (value) => value == null || /^[а-яА-Яa-zA-Z]+$/.test(value),
-      )
-      .max(50, 'макс. 50 символов')
-      .required('обязательное поле'),
-    sex: yup.mixed().oneOf(['man', 'woman'], 'выберите пол'),
-
-    advantages: yup.array().of(
-      yup
-        .string()
-        .test(
-          'char-or-number',
-          () => `только буквы и цифры`,
-          (value) => value == null || /^[а-яА-Яa-zA-Z0-9]+$/.test(value),
-        )
-        .max(30, 'макс. 30 символов')
-        .required('обязательное поле'),
-    ),
-    radio: yup.string().required('обязательное поле'),
-    checkbox: yup.array().min(1, 'обязательное поле'),
-
-    about: yup
-      .string()
-      .min(2, 'Поле обязательно к заполнению')
-      .max(200, 'Максимум 200 символов'),
-  });
 
   const form = useForm({
     initialValues: {
@@ -85,30 +37,32 @@ export const Form: FC = () => {
       sername: 'Romanov',
       sex: 'man',
 
-      advantages: ['oil', '34', '3433'],
+      advantages: [
+        { name: '123', key: randomId() },
+        { name: '456', key: randomId() },
+        { name: '789', key: randomId() },
+      ],
       checkbox: [
         { value: 1, status: true },
         { value: 2, status: false },
-        { value: 3, status: true },
+        { value: 3, status: false },
       ],
-      radio: '3',
+      radio: '1',
 
       about: '',
     },
 
-    validate: yupResolver(validateSchema),
+    validate: yupResolver(validateFormsSchema(active)),
   });
 
   const handleSubmit = (values: typeof form.values) => {
-    // debugger;
-    console.log(values);
-    dispatch(setDataForms(values));
-    dispatch(formATh());
+    if (values.about.length > 1) {
+      dispatch(setDataForms(values));
+      dispatch(formATh());
+    }
   };
 
-  // STEPs
   const nextStep = () => {
-    // console.log(form.values);
     setActive((current) => {
       if (form.validate().hasErrors) {
         return current;
@@ -117,19 +71,18 @@ export const Form: FC = () => {
     });
   };
   const prevStep = () => {
-    if (active === 0) {
+    if (active === StepActive.Step1) {
       return navigate('/');
     }
     setActive((prev) => prev - 1);
   };
 
-  // Advantages
-  const fields = form.values.advantages.map((_, index) => (
-    <Group key={index} mt="xs">
+  const fields = form.values.advantages.map((el, index) => (
+    <Group key={el.key} mt="xs">
       <TextInput
-        style={{ width: '300px', height: '44px' }}
+        style={formsStyle}
         placeholder="Placeholder"
-        {...form.getInputProps(`advantages.${index}`)}
+        {...form.getInputProps(`advantages.${index}.name`)}
       />
       <ActionIcon color="red" onClick={() => form.removeListItem('advantages', index)}>
         <IconTrash size="1rem" />
@@ -137,7 +90,6 @@ export const Form: FC = () => {
     </Group>
   ));
 
-  // Checkbox
   const checkboxField = form.values.checkbox.map((el, index) => (
     <Group key={el.value} mt="xs">
       <Checkbox
@@ -149,48 +101,44 @@ export const Form: FC = () => {
     </Group>
   ));
 
-  // console.log(form.values);
-
   return (
-    <Box maw={680} p={'60px 0 80px 110px'}>
+    <Box maw={680} p="60px 0 80px 110px">
       <form onSubmit={form.onSubmit(handleSubmit)}>
         {/*<form onSubmit={form.onSubmit((values) => console.log(values))}>*/}
         <Stepper active={active}>
-          {/*// 1 - Nickname...*/}
           <Stepper.Step>
             <TextInput
               mt="65px"
-              style={{ width: '300px', height: '44px' }}
+              style={formsStyle}
               label="Nickname"
               placeholder="Nickname"
               {...form.getInputProps('nickname')}
             />
             <TextInput
               mt="50px"
-              style={{ width: '300px', height: '44px' }}
+              style={formsStyle}
               label="Name"
               placeholder="name"
               {...form.getInputProps('name')}
             />
             <TextInput
               mt="50px"
-              style={{ width: '300px', height: '44px' }}
+              style={formsStyle}
               label="Sername"
               placeholder="Sername"
               {...form.getInputProps('sername')}
             />
             <Select
               mt="50px"
-              style={{ width: '300px', height: '44px' }}
+              style={formsStyle}
               label="Sex"
               placeholder="Не выбрано"
               data={['man', 'woman']}
               {...form.getInputProps('sex')}
             />
           </Stepper.Step>
-          {/*// 2 - Advantages*/}
           <Stepper.Step>
-            <Group mt="65px" style={{ display: 'block' }}>
+            <Group mt="65px" display="block">
               <Text fw={500} size="sm">
                 Advantages
               </Text>
@@ -199,13 +147,13 @@ export const Form: FC = () => {
             <Group justify="flex-start" mt="md">
               <Button onClick={() => form.insertListItem('advantages', '')}>+</Button>
             </Group>
-            <Group mt="25px" style={{ display: 'block' }}>
+            <Group mt="25px" display="block">
               <Text fw={500} size="sm">
                 Checkbox group
               </Text>
               {checkboxField}
             </Group>
-            <Group mt="25px" style={{ display: 'block' }}>
+            <Group mt="25px" display="block">
               <Text fw={500} size="sm">
                 Radio group
               </Text>
@@ -216,7 +164,6 @@ export const Form: FC = () => {
               </Radio.Group>
             </Group>
           </Stepper.Step>
-          {/*// 3 - About*/}
           <Stepper.Step state={'stepInactive'}>
             <Textarea
               mt="65px"
@@ -233,7 +180,7 @@ export const Form: FC = () => {
           <Button variant="default" onClick={prevStep}>
             Назад
           </Button>
-          {active === 2 ? (
+          {active === StepActive.Step3 ? (
             <Button type="submit">Отправить</Button>
           ) : (
             <Button onClick={nextStep}>Далее</Button>

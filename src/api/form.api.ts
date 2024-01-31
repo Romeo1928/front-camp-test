@@ -19,7 +19,7 @@ export interface IForm {
   sername: string;
   sex: string;
 
-  advantages: string[];
+  advantages: { name: string; key: string }[];
   checkbox: { value: number; status: boolean }[];
   radio: string;
 

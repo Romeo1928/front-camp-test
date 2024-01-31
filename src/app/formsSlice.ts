@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { formAPI, IForm } from '../api/form.api.ts';
 import { RootState } from 'app/store.ts';
+import { randomId } from '@mantine/hooks';
 
 export type RequestStatusType = 'success' | 'failed';
 
@@ -15,14 +16,18 @@ const initialState: { isLoading: boolean; forms: IForm } = {
     sername: '',
     sex: '',
 
-    advantages: ['', '', ''],
+    advantages: [
+      { name: '', key: randomId() },
+      { name: '', key: randomId() },
+      { name: '', key: randomId() },
+    ],
     checkbox: [
       { value: 1, status: false },
       { value: 2, status: false },
       { value: 3, status: false },
     ],
     radio: '',
-    about: '',
+    about: undefined,
   },
 };
 
@@ -31,7 +36,6 @@ const formsSlice = createSlice({
   name: 'form',
   initialState,
   reducers: {
-    // подreducer
     setDataForms: (state, { payload }: PayloadAction<Partial<IForm>>) => {
       state.forms = { ...state.forms, ...payload };
     },
@@ -53,7 +57,7 @@ const formsSlice = createSlice({
 export const formATh = createAsyncThunk(
   'form/formATh',
   async (_, { rejectWithValue, getState }) => {
-    const formData = (getState() as RootState).forms.forms;
+    const formData: IForm = (getState() as RootState).forms.forms;
     try {
       return formAPI.form(formData);
     } catch (err) {
@@ -62,10 +66,5 @@ export const formATh = createAsyncThunk(
   },
 );
 
-// Создаем reducer с помощью formsSlice
 export const formsReducer = formsSlice.reducer;
-
-// Создаем actions на основе reducers из среза формы (лучше деструктуризацией)
 export const { setDataForms } = formsSlice.actions;
-
-export const formsActions = formsSlice.actions;
