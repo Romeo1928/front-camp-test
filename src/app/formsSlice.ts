@@ -1,12 +1,22 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { formAPI, IForm } from '../api/form.api.ts';
-import { RootState } from 'app/store.ts';
+import { formAPI, IForm } from 'api/form.api';
+import { RootState } from 'app/store';
 import { randomId } from '@mantine/hooks';
+import { StepActive } from 'utils/enum/stepActive';
 
-export type RequestStatusType = 'success' | 'failed';
+export type RequestStatusType = 'idle' | 'loading' | 'succeeded' | 'failed';
 
-const initialState: { isLoading: boolean; forms: IForm } = {
-  isLoading: false,
+interface InitialStateType {
+  isLoading: RequestStatusType;
+  activeStep: StepActive;
+  error: null | string;
+  forms: IForm;
+}
+
+const initialState: InitialStateType = {
+  isLoading: 'idle' as RequestStatusType,
+  activeStep: StepActive.Step1,
+  error: null,
   forms: {
     phone: '',
     email: '',
@@ -27,11 +37,10 @@ const initialState: { isLoading: boolean; forms: IForm } = {
       { value: 3, status: false },
     ],
     radio: '',
-    about: undefined,
+    about: '',
   },
 };
 
-// Создаем slice формы с помощью createSlice
 const formsSlice = createSlice({
   name: 'form',
   initialState,
@@ -39,17 +48,22 @@ const formsSlice = createSlice({
     setDataForms: (state, { payload }: PayloadAction<Partial<IForm>>) => {
       state.forms = { ...state.forms, ...payload };
     },
+    setActiveStep: (state, action: PayloadAction<StepActive>) => {
+      state.activeStep = action.payload;
+    },
   },
 
   extraReducers: (builder) => {
     builder.addCase(formATh.pending, (state) => {
-      state.isLoading = true;
-    });
-    builder.addCase(formATh.rejected, (state) => {
-      state.isLoading = false;
+      state.isLoading = 'loading';
     });
     builder.addCase(formATh.fulfilled, (state) => {
-      state.isLoading = false;
+      state.isLoading = 'succeeded';
+    });
+    builder.addCase(formATh.rejected, (state) => {
+      state.isLoading = 'failed';
+      state.error = 'Ошибка';
+      state.activeStep = StepActive.StepError;
     });
   },
 });
@@ -61,10 +75,14 @@ export const formATh = createAsyncThunk(
     try {
       return formAPI.form(formData);
     } catch (err) {
-      rejectWithValue(err);
+      return rejectWithValue(err);
     }
   },
 );
 
+export const getActiveStep = (state: RootState) => state.forms.activeStep;
+export const getIsLoading = (state: RootState) => state.forms.isLoading;
+export const getIsError = (state: RootState) => state.forms.error;
+
 export const formsReducer = formsSlice.reducer;
-export const { setDataForms } = formsSlice.actions;
+export const { setDataForms, setActiveStep } = formsSlice.actions;

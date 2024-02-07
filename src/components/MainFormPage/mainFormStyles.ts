@@ -1,7 +1,8 @@
 import { CSSProperties } from 'react';
 
 export const container: CSSProperties = {
-  padding: '25px',
+  marginLeft: '110px',
+  marginTop: '60px',
 };
 export const headerContainer: CSSProperties = {
   marginBottom: '25px',

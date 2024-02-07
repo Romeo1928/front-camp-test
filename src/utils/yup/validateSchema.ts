@@ -1,12 +1,12 @@
 import * as yup from 'yup';
-import { StepActive } from '../enum.ts';
+import { StepActive } from 'utils/enum/stepActive.ts';
 
 export const validateMainFormSchema = yup.object().shape({
   phone: yup.string().required('Обязательное поле'),
   email: yup.string().email('Invalid email').required('Обязательное поле'),
 });
-export const validateFormsSchema = (active: StepActive) => {
-  if (active === StepActive.Step1) {
+export const validateFormsSchema = (activeStep: StepActive) => {
+  if (activeStep === StepActive.Step1) {
     return yup.object().shape({
       nickname: yup
         .string()
@@ -37,7 +37,7 @@ export const validateFormsSchema = (active: StepActive) => {
         .required('Обязательное поле'),
       sex: yup.mixed().oneOf(['man', 'woman'], 'выберите пол'),
     });
-  } else if (active === StepActive.Step2) {
+  } else if (activeStep === StepActive.Step2) {
     return yup.object().shape({
       advantages: yup
         .array()
@@ -61,19 +61,14 @@ export const validateFormsSchema = (active: StepActive) => {
             status: yup.boolean(),
           }),
         )
-        .test(
-          'at-least-one-true',
-          'Хотя бы один элемент должен быть true',
-          function (values) {
-            if (values) {
-              return values.some((el) => el.status);
-            }
-            return false;
-          },
-        )
-        .required('Хотя бы один элемент должен быть выбран'),
+        .test('at-least-one-true', 'Хотя бы один элемент должен быть true', (values) => {
+          if (values) {
+            return values.some((el) => el.status);
+          }
+          return false;
+        }),
     });
-  } else if (active === StepActive.Step3) {
+  } else if (activeStep === StepActive.Step3) {
     return yup.object().shape({
       about: yup.string().min(2, 'Обязательное поле').max(200, 'Максимум 200 символов'),
     });

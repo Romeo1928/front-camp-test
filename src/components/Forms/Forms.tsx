@@ -1,34 +1,59 @@
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import {
   ActionIcon,
   Box,
   Button,
   Checkbox,
   Group,
+  Loader,
   Radio,
+  rem,
   Select,
   Stepper,
   Text,
   Textarea,
   TextInput,
 } from '@mantine/core';
-
-import { useForm } from '@mantine/form';
-import { IconTrash } from '@tabler/icons-react';
-import { useNavigate } from 'react-router-dom';
-
-import { formATh, setDataForms } from '../../app/formsSlice.ts';
 import { yupResolver } from 'mantine-form-yup-resolver';
-import { useAppDispatch } from '../../app/hooks.ts';
+import { useForm } from '@mantine/form';
 import { randomId } from '@mantine/hooks';
-import { validateFormsSchema } from '../../utils/yup/validateSchema.ts';
-import { StepActive } from '../../utils/enum.ts';
-import { formsStyle } from './formsStyles.ts';
+import { IconCheck, IconTrash, IconX } from '@tabler/icons-react';
+import { useNavigate } from 'react-router-dom';
+import {
+  formATh,
+  getActiveStep,
+  getIsError,
+  getIsLoading,
+  setActiveStep,
+  setDataForms,
+} from 'app/formsSlice';
+import { useAppDispatch, useAppSelector } from 'app/hooks';
+import { validateFormsSchema } from 'utils/yup/validateSchema';
+import { formsStyle, isLoadingStyle } from 'components/Forms/formsStyles';
+import { ROUTES } from 'utils/enum/routes';
+import { StepActive } from 'utils/enum/stepActive';
+import { NotificationWithButton } from 'shared/NotificationWithButton';
 
+type TextInputData = {
+  mt: string;
+  label: 'Nickname' | 'Name' | 'Sername';
+  placeholder: 'Nickname' | 'Name' | 'Sername';
+  path: 'nickname' | 'name' | 'sername';
+};
+
+const textInputData: TextInputData[] = [
+  { mt: '65px', label: 'Nickname', placeholder: 'Nickname', path: 'nickname' },
+  { mt: '50px', label: 'Name', placeholder: 'Name', path: 'name' },
+  { mt: '50px', label: 'Sername', placeholder: 'Sername', path: 'sername' },
+];
+const radioData: string[] = ['1', '2', '3'];
 export const Forms: FC = () => {
-  const [active, setActive] = useState<StepActive>(StepActive.Step1);
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const activeStep = useAppSelector(getActiveStep);
+  const isLoading = useAppSelector(getIsLoading);
+  const error = useAppSelector(getIsError);
 
   const form = useForm({
     initialValues: {
@@ -43,38 +68,48 @@ export const Forms: FC = () => {
         { name: '789', key: randomId() },
       ],
       checkbox: [
-        { value: 1, status: true },
+        { value: 1, status: false },
         { value: 2, status: false },
         { value: 3, status: false },
       ],
       radio: '1',
 
-      about: '',
+      about: 'Text...',
     },
 
-    validate: yupResolver(validateFormsSchema(active)),
+    validate: yupResolver(validateFormsSchema(activeStep)),
   });
 
   const handleSubmit = (values: typeof form.values) => {
-    if (values.about.length > 1) {
-      dispatch(setDataForms(values));
+    if (activeStep === StepActive.Step3) {
+      dispatch(
+        setDataForms({
+          ...values,
+          advantages: values.advantages.map((el) => ({ ...el })),
+          checkbox: values.checkbox.map((el) => ({ ...el })),
+        }),
+      );
       dispatch(formATh());
     }
   };
 
   const nextStep = () => {
-    setActive((current) => {
-      if (form.validate().hasErrors) {
-        return current;
-      }
-      return current < 3 ? current + 1 : current;
-    });
-  };
-  const prevStep = () => {
-    if (active === StepActive.Step1) {
-      return navigate('/');
+    if (form.validate().hasErrors) {
+      return;
     }
-    setActive((prev) => prev - 1);
+    dispatch(setActiveStep(activeStep < StepActive.Step3 ? activeStep + 1 : activeStep));
+  };
+
+  const prevStep = () => {
+    if (activeStep === StepActive.Step1) {
+      navigate(ROUTES.MAIN);
+    } else {
+      dispatch(setActiveStep(activeStep - 1));
+    }
+  };
+
+  const onClickMainFormHandler = () => {
+    navigate(ROUTES.MAIN);
   };
 
   const fields = form.values.advantages.map((el, index) => (
@@ -89,8 +124,7 @@ export const Forms: FC = () => {
       </ActionIcon>
     </Group>
   ));
-
-  const checkboxField = form.values.checkbox.map((el, index) => (
+  const checkboxFields = form.values.checkbox.map((el, index) => (
     <Group key={el.value} mt="xs">
       <Checkbox
         mt="xs"
@@ -100,34 +134,30 @@ export const Forms: FC = () => {
       />
     </Group>
   ));
+  const checkIcon = <IconCheck style={{ width: rem(20), height: rem(20) }} />;
+  const xIcon = <IconX style={{ width: rem(20), height: rem(20) }} />;
 
   return (
-    <Box maw={680} p="60px 0 80px 110px">
+    <Box style={{ position: 'relative' }} maw={680} m="60px 0 80px 110px">
+      {isLoading === 'loading' && (
+        <div style={isLoadingStyle}>
+          <Loader size={70} color="blue" />
+        </div>
+      )}
+
       <form onSubmit={form.onSubmit(handleSubmit)}>
-        {/*<form onSubmit={form.onSubmit((values) => console.log(values))}>*/}
-        <Stepper active={active}>
+        <Stepper active={activeStep}>
           <Stepper.Step>
-            <TextInput
-              mt="65px"
-              style={formsStyle}
-              label="Nickname"
-              placeholder="Nickname"
-              {...form.getInputProps('nickname')}
-            />
-            <TextInput
-              mt="50px"
-              style={formsStyle}
-              label="Name"
-              placeholder="name"
-              {...form.getInputProps('name')}
-            />
-            <TextInput
-              mt="50px"
-              style={formsStyle}
-              label="Sername"
-              placeholder="Sername"
-              {...form.getInputProps('sername')}
-            />
+            {textInputData.map((el) => (
+              <TextInput
+                key={el.path}
+                mt={el.mt}
+                style={formsStyle}
+                label={el.label}
+                placeholder={el.placeholder}
+                {...form.getInputProps(el.path)}
+              />
+            ))}
             <Select
               mt="50px"
               style={formsStyle}
@@ -137,34 +167,42 @@ export const Forms: FC = () => {
               {...form.getInputProps('sex')}
             />
           </Stepper.Step>
+
           <Stepper.Step>
             <Group mt="65px" display="block">
               <Text fw={500} size="sm">
                 Advantages
               </Text>
-              {fields}
             </Group>
+            {fields}
             <Group justify="flex-start" mt="md">
-              <Button onClick={() => form.insertListItem('advantages', '')}>+</Button>
+              <Button
+                onClick={() =>
+                  form.insertListItem('advantages', { name: '', key: randomId() })
+                }
+              >
+                +
+              </Button>
             </Group>
             <Group mt="25px" display="block">
               <Text fw={500} size="sm">
                 Checkbox group
               </Text>
-              {checkboxField}
             </Group>
+            {checkboxFields}
             <Group mt="25px" display="block">
               <Text fw={500} size="sm">
                 Radio group
               </Text>
               <Radio.Group {...form.getInputProps('radio')}>
-                <Radio mt="xs" value="1" label="1" />
-                <Radio mt="xs" value="2" label="2" />
-                <Radio mt="xs" value="3" label="3" />
+                {radioData.map((el) => (
+                  <Radio key={el} mt="xs" value={el} label={el} />
+                ))}
               </Radio.Group>
             </Group>
           </Stepper.Step>
-          <Stepper.Step state={'stepInactive'}>
+
+          <Stepper.Step>
             <Textarea
               mt="65px"
               size="lg"
@@ -172,16 +210,42 @@ export const Forms: FC = () => {
               maxLength={200}
               placeholder="Placeholder"
               {...form.getInputProps('about')}
+              disabled={isLoading === 'loading'}
             />
           </Stepper.Step>
+
+          <Stepper.Completed>
+            {activeStep === StepActive.StepError ? (
+              <NotificationWithButton
+                icon={xIcon}
+                color={'red'}
+                title={error}
+                onClick={prevStep}
+              >
+                закрыть
+              </NotificationWithButton>
+            ) : (
+              <NotificationWithButton
+                mt={'md'}
+                icon={checkIcon}
+                color={'teal'}
+                title={'Форма успешно отправлена'}
+                onClick={onClickMainFormHandler}
+              >
+                На главную
+              </NotificationWithButton>
+            )}
+          </Stepper.Completed>
         </Stepper>
 
         <Group justify="space-between" mt="90">
-          <Button variant="default" onClick={prevStep}>
+          <Button variant="default" onClick={prevStep} disabled={isLoading === 'loading'}>
             Назад
           </Button>
-          {active === StepActive.Step3 ? (
-            <Button type="submit">Отправить</Button>
+          {activeStep === StepActive.Step3 ? (
+            <Button key="1" type="submit" disabled={isLoading === 'loading'}>
+              Отправить
+            </Button>
           ) : (
             <Button onClick={nextStep}>Далее</Button>
           )}

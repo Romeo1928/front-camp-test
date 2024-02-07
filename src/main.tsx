@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { MantineProvider } from '@mantine/core';
 
 import { Provider } from 'react-redux';
-import { store } from '../src/app/store';
+import { store } from 'app/store';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <BrowserRouter>

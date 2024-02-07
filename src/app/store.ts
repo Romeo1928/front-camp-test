@@ -1,7 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { formsReducer } from '../app/formsSlice.ts';
+import { formsReducer } from 'app/formsSlice';
 
-// Создали хранилище Redux с нашим срезом формы
 export const store = configureStore({
   reducer: {
     forms: formsReducer,

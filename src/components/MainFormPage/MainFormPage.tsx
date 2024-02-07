@@ -2,18 +2,19 @@ import { Box, Button, Container, Divider, Group, Text, TextInput } from '@mantin
 import { FC } from 'react';
 import { useForm } from '@mantine/form';
 import { useNavigate } from 'react-router-dom';
-import { setDataForms } from '../../app/formsSlice.ts';
+import { setDataForms } from 'app/formsSlice';
 import { yupResolver } from 'mantine-form-yup-resolver';
-import { useAppDispatch } from '../../app/hooks.ts';
-import { validateMainFormSchema } from '../../utils/yup/validateSchema.ts';
+import { useAppDispatch } from 'app/hooks';
+import { validateMainFormSchema } from 'utils/yup/validateSchema';
 import {
   avatar,
   container,
   headerContainer,
   inputNumber,
   linksStyle,
-} from './mainFormStyles.ts';
-import { links } from '../../configs/links.ts';
+} from './mainFormStyles';
+import { links } from 'configs/links';
+import { ROUTES } from 'utils/enum/routes';
 
 export const MainFormPage: FC = () => {
   const dispatch = useAppDispatch();
@@ -29,7 +30,7 @@ export const MainFormPage: FC = () => {
   });
 
   const handleSubmit = (values: typeof form.values) => {
-    navigate('/step');
+    navigate(ROUTES.STEP);
     dispatch(setDataForms(values));
   };
 
@@ -38,7 +39,7 @@ export const MainFormPage: FC = () => {
       <div style={headerContainer}>
         <Box display="flex">
           <Box style={avatar}>
-            <Text>РР</Text>
+            <Text size="40px">РР</Text>
           </Box>
           <Box>
             <Text fw="500" size="20px">
@@ -57,6 +58,7 @@ export const MainFormPage: FC = () => {
           </Box>
         </Box>
       </div>
+
       <Box maw={400}>
         <Divider my="md" />
         <form onSubmit={form.onSubmit(handleSubmit)}>
