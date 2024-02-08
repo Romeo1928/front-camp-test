@@ -3,6 +3,7 @@ import {
   ActionIcon,
   Box,
   Button,
+  Center,
   Checkbox,
   Group,
   Loader,
@@ -33,20 +34,9 @@ import { formsStyle, isLoadingStyle } from 'components/Forms/formsStyles';
 import { ROUTES } from 'utils/enum/routes';
 import { StepActive } from 'utils/enum/stepActive';
 import { NotificationWithButton } from 'shared/NotificationWithButton';
+import { textInputData } from 'configs/textInputData';
+import { radioData } from 'configs/radioData';
 
-type TextInputData = {
-  mt: string;
-  label: 'Nickname' | 'Name' | 'Sername';
-  placeholder: 'Nickname' | 'Name' | 'Sername';
-  path: 'nickname' | 'name' | 'sername';
-};
-
-const textInputData: TextInputData[] = [
-  { mt: '65px', label: 'Nickname', placeholder: 'Nickname', path: 'nickname' },
-  { mt: '50px', label: 'Name', placeholder: 'Name', path: 'name' },
-  { mt: '50px', label: 'Sername', placeholder: 'Sername', path: 'sername' },
-];
-const radioData: string[] = ['1', '2', '3'];
 export const Forms: FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -68,7 +58,7 @@ export const Forms: FC = () => {
         { name: '789', key: randomId() },
       ],
       checkbox: [
-        { value: 1, status: false },
+        { value: 1, status: true },
         { value: 2, status: false },
         { value: 3, status: false },
       ],
@@ -124,25 +114,26 @@ export const Forms: FC = () => {
       </ActionIcon>
     </Group>
   ));
-  const checkboxFields = form.values.checkbox.map((el, index) => (
-    <Group key={el.value} mt="xs">
-      <Checkbox
-        mt="xs"
-        label={el.value}
-        checked={el.status}
-        {...form.getInputProps(`checkbox.${index}.status`)}
-      />
-    </Group>
-  ));
+  const checkboxFields = form.values.checkbox.map((el, index) => {
+    return (
+      <Group key={el.value} mt="xs">
+        <Checkbox
+          mt="xs"
+          label={el.value}
+          checked={el.status}
+          {...form.getInputProps(`checkbox.${index}.status`)}
+        />
+      </Group>
+    );
+  });
   const checkIcon = <IconCheck style={{ width: rem(20), height: rem(20) }} />;
   const xIcon = <IconX style={{ width: rem(20), height: rem(20) }} />;
-
   return (
     <Box style={{ position: 'relative' }} maw={680} m="60px 0 80px 110px">
       {isLoading === 'loading' && (
-        <div style={isLoadingStyle}>
+        <Center style={isLoadingStyle}>
           <Loader size={70} color="blue" />
-        </div>
+        </Center>
       )}
 
       <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -243,7 +234,7 @@ export const Forms: FC = () => {
             Назад
           </Button>
           {activeStep === StepActive.Step3 ? (
-            <Button key="1" type="submit" disabled={isLoading === 'loading'}>
+            <Button key="1" type="submit" loading={isLoading === 'loading'}>
               Отправить
             </Button>
           ) : (

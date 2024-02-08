@@ -1,4 +1,13 @@
-import { Box, Button, Container, Divider, Group, Text, TextInput } from '@mantine/core';
+import {
+  Box,
+  Button,
+  Container,
+  Divider,
+  Flex,
+  Group,
+  Text,
+  TextInput,
+} from '@mantine/core';
 import { FC } from 'react';
 import { useForm } from '@mantine/form';
 import { useNavigate } from 'react-router-dom';
@@ -6,13 +15,7 @@ import { setDataForms } from 'app/formsSlice';
 import { yupResolver } from 'mantine-form-yup-resolver';
 import { useAppDispatch } from 'app/hooks';
 import { validateMainFormSchema } from 'utils/yup/validateSchema';
-import {
-  avatar,
-  container,
-  headerContainer,
-  inputNumber,
-  linksStyle,
-} from './mainFormStyles';
+import { avatar, container, inputNumber, linksStyle } from './mainFormStyles';
 import { links } from 'configs/links';
 import { ROUTES } from 'utils/enum/routes';
 
@@ -36,8 +39,8 @@ export const MainFormPage: FC = () => {
 
   return (
     <Container style={container}>
-      <div style={headerContainer}>
-        <Box display="flex">
+      <Box mb="25px">
+        <Flex>
           <Box style={avatar}>
             <Text size="40px">РР</Text>
           </Box>
@@ -56,8 +59,8 @@ export const MainFormPage: FC = () => {
               ))}
             </ul>
           </Box>
-        </Box>
-      </div>
+        </Flex>
+      </Box>
 
       <Box maw={400}>
         <Divider my="md" />

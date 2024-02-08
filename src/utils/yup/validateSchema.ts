@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { StepActive } from 'utils/enum/stepActive.ts';
+import { StepActive } from 'utils/enum/stepActive';
 
 export const validateMainFormSchema = yup.object().shape({
   phone: yup.string().required('Обязательное поле'),
@@ -57,8 +57,8 @@ export const validateFormsSchema = (activeStep: StepActive) => {
         .array()
         .of(
           yup.object().shape({
-            value: yup.number(),
-            status: yup.boolean(),
+            value: yup.number().required(),
+            status: yup.boolean().required(),
           }),
         )
         .test('at-least-one-true', 'Хотя бы один элемент должен быть true', (values) => {

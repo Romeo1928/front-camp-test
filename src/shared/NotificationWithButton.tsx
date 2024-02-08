@@ -1,5 +1,5 @@
 import { FC, ReactNode } from 'react';
-import { Button, Notification } from '@mantine/core';
+import { Button, Center, Flex, Notification } from '@mantine/core';
 
 type NotificationWithButtonProps = {
   mt?: string;
@@ -19,8 +19,18 @@ export const NotificationWithButton: FC<NotificationWithButtonProps> = ({
   children,
 }) => {
   return (
-    <Notification icon={icon} withCloseButton={false} color={color} title={title} mt={mt}>
-      <Button onClick={onClick}>{children}</Button>
-    </Notification>
+    <Center>
+      <Flex>
+        <Notification
+          icon={icon}
+          withCloseButton={false}
+          color={color}
+          title={title}
+          mt={mt}
+        >
+          <Button onClick={onClick}>{children}</Button>
+        </Notification>
+      </Flex>
+    </Center>
   );
 };
