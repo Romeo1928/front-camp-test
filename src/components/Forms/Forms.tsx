@@ -114,18 +114,16 @@ export const Forms: FC = () => {
       </ActionIcon>
     </Group>
   ));
-  const checkboxFields = form.values.checkbox.map((el, index) => {
-    return (
-      <Group key={el.value} mt="xs">
-        <Checkbox
-          mt="xs"
-          label={el.value}
-          checked={el.status}
-          {...form.getInputProps(`checkbox.${index}.status`)}
-        />
-      </Group>
-    );
-  });
+  const checkboxFields = form.values.checkbox.map((el, index) => (
+    <Group key={el.value} mt="xs">
+      <Checkbox
+        mt="xs"
+        label={el.value}
+        checked={el.status}
+        {...form.getInputProps(`checkbox.${index}.status`)}
+      />
+    </Group>
+  ));
   const checkIcon = <IconCheck style={{ width: rem(20), height: rem(20) }} />;
   const xIcon = <IconX style={{ width: rem(20), height: rem(20) }} />;
   return (
