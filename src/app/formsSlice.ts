@@ -60,25 +60,29 @@ const formsSlice = createSlice({
     builder.addCase(formATh.fulfilled, (state) => {
       state.isLoading = 'succeeded';
     });
-    builder.addCase(formATh.rejected, (state) => {
+    builder.addCase(formATh.rejected, (state, action) => {
       state.isLoading = 'failed';
-      state.error = 'Ошибка';
+      // debugger;
+      console.log('Error payload:', action.payload);
+      state.error = action.payload as string;
       state.activeStep = StepActive.StepError;
     });
   },
 });
 
-export const formATh = createAsyncThunk(
-  'form/formATh',
-  async (_, { rejectWithValue, getState }) => {
-    const formData: IForm = (getState() as RootState).forms.forms;
-    try {
-      return formAPI.form(formData);
-    } catch (err) {
-      return rejectWithValue(err);
-    }
-  },
-);
+export const formATh = createAsyncThunk<
+  IForm,
+  undefined,
+  { rejectValue: string; state: { forms: InitialStateType } }
+>('form/formATh', async (_, { rejectWithValue, getState }) => {
+  const formData: IForm = (getState() as RootState).forms.forms;
+  try {
+    const response = await formAPI.submitForm(formData);
+    return response.data;
+  } catch (err) {
+    return rejectWithValue('Ошибка');
+  }
+});
 
 export const getActiveStep = (state: RootState) => state.forms.activeStep;
 export const getIsLoading = (state: RootState) => state.forms.isLoading;

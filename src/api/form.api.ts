@@ -5,7 +5,7 @@ const instance = axios.create({
 });
 
 export const formAPI = {
-  form(data: IForm) {
+  submitForm(data: IForm) {
     return instance.post('content/v1/bootcamp/frontend', data);
   },
 };

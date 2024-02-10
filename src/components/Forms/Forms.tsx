@@ -19,28 +19,17 @@ import { yupResolver } from 'mantine-form-yup-resolver';
 import { useForm } from '@mantine/form';
 import { randomId } from '@mantine/hooks';
 import { IconCheck, IconTrash, IconX } from '@tabler/icons-react';
-import { useNavigate } from 'react-router-dom';
-import {
-  formATh,
-  getActiveStep,
-  getIsError,
-  getIsLoading,
-  setActiveStep,
-  setDataForms,
-} from 'app/formsSlice';
-import { useAppDispatch, useAppSelector } from 'app/hooks';
+import { getActiveStep, getIsError, getIsLoading } from 'app/formsSlice';
+import { useAppSelector } from 'app/hooks';
 import { validateFormsSchema } from 'utils/yup/validateSchema';
-import { formsStyle, isLoadingStyle } from 'components/Forms/formsStyles';
-import { ROUTES } from 'utils/enum/routes';
+import { isLoadingStyle } from 'components/Forms/formsStyles';
 import { StepActive } from 'utils/enum/stepActive';
 import { NotificationWithButton } from 'shared/NotificationWithButton';
 import { textInputData } from 'configs/textInputData';
 import { radioData } from 'configs/radioData';
+import { UseFormHandler } from 'hooks/useFormHandler.ts';
 
 export const Forms: FC = () => {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-
   const activeStep = useAppSelector(getActiveStep);
   const isLoading = useAppSelector(getIsLoading);
   const error = useAppSelector(getIsError);
@@ -69,43 +58,14 @@ export const Forms: FC = () => {
 
     validate: yupResolver(validateFormsSchema(activeStep)),
   });
+  const { handleSubmit, nextStep, prevStep, onClickMainFormHandler } = UseFormHandler();
 
-  const handleSubmit = (values: typeof form.values) => {
-    if (activeStep === StepActive.Step3) {
-      dispatch(
-        setDataForms({
-          ...values,
-          advantages: values.advantages.map((el) => ({ ...el })),
-          checkbox: values.checkbox.map((el) => ({ ...el })),
-        }),
-      );
-      dispatch(formATh());
-    }
-  };
-
-  const nextStep = () => {
-    if (form.validate().hasErrors) {
-      return;
-    }
-    dispatch(setActiveStep(activeStep < StepActive.Step3 ? activeStep + 1 : activeStep));
-  };
-
-  const prevStep = () => {
-    if (activeStep === StepActive.Step1) {
-      navigate(ROUTES.MAIN);
-    } else {
-      dispatch(setActiveStep(activeStep - 1));
-    }
-  };
-
-  const onClickMainFormHandler = () => {
-    navigate(ROUTES.MAIN);
-  };
-
-  const fields = form.values.advantages.map((el, index) => (
-    <Group key={el.key} mt="xs">
+  const fields = form.values.advantages.map((field, index) => (
+    <Group key={field.key} mt="xs">
       <TextInput
-        style={formsStyle}
+        mb="5px"
+        w="300px"
+        h="44px"
         placeholder="Placeholder"
         {...form.getInputProps(`advantages.${index}.name`)}
       />
@@ -126,8 +86,9 @@ export const Forms: FC = () => {
   ));
   const checkIcon = <IconCheck style={{ width: rem(20), height: rem(20) }} />;
   const xIcon = <IconX style={{ width: rem(20), height: rem(20) }} />;
+
   return (
-    <Box style={{ position: 'relative' }} maw={680} m="60px 0 80px 110px">
+    <Box pos="relative" maw={680} m="60px 0 80px 110px">
       {isLoading === 'loading' && (
         <Center style={isLoadingStyle}>
           <Loader size={70} color="blue" />
@@ -141,7 +102,9 @@ export const Forms: FC = () => {
               <TextInput
                 key={el.path}
                 mt={el.mt}
-                style={formsStyle}
+                mb={el.mb}
+                w={el.w}
+                h={el.h}
                 label={el.label}
                 placeholder={el.placeholder}
                 {...form.getInputProps(el.path)}
@@ -149,7 +112,9 @@ export const Forms: FC = () => {
             ))}
             <Select
               mt="50px"
-              style={formsStyle}
+              mb="5px"
+              w="300px"
+              h="44px"
               label="Sex"
               placeholder="Не выбрано"
               data={['man', 'woman']}
@@ -236,7 +201,7 @@ export const Forms: FC = () => {
               Отправить
             </Button>
           ) : (
-            <Button onClick={nextStep}>Далее</Button>
+            <Button onClick={() => nextStep(form)}>Далее</Button>
           )}
         </Group>
       </form>

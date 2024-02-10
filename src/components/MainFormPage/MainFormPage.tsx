@@ -1,10 +1,14 @@
 import {
+  Anchor,
+  Avatar,
   Box,
   Button,
   Container,
   Divider,
   Flex,
   Group,
+  Image,
+  List,
   Text,
   TextInput,
 } from '@mantine/core';
@@ -15,7 +19,6 @@ import { setDataForms } from 'app/formsSlice';
 import { yupResolver } from 'mantine-form-yup-resolver';
 import { useAppDispatch } from 'app/hooks';
 import { validateMainFormSchema } from 'utils/yup/validateSchema';
-import { avatar, container, inputNumber, linksStyle } from './mainFormStyles';
 import { links } from 'configs/links';
 import { ROUTES } from 'utils/enum/routes';
 
@@ -38,26 +41,34 @@ export const MainFormPage: FC = () => {
   };
 
   return (
-    <Container style={container}>
+    <Container ml="110px" mt="60px">
       <Box mb="25px">
         <Flex>
-          <Box style={avatar}>
-            <Text size="40px">РР</Text>
-          </Box>
+          <Avatar color="#212830" size="lg" radius="xl" mr="25px">
+            РР
+          </Avatar>
           <Box>
-            <Text fw="500" size="20px">
+            <Text fw="500" size="20px" mb="8px">
               Роман Романов
             </Text>
-            <ul style={linksStyle}>
-              {links.map((el) => (
-                <li style={{ marginRight: '20px' }} key={el.id}>
-                  <img src={el.icon} alt="icon" style={{ marginRight: '2.5px' }} />
-                  <a href={el.href} target="_blank" style={{ textDecoration: 'none' }}>
-                    {el.text}
-                  </a>
-                </li>
+            <List display="flex">
+              {links.map((link) => (
+                <List.Item
+                  style={{
+                    listStyleType: 'none',
+                    marginRight: '20px',
+                  }}
+                  key={link.id}
+                >
+                  <Flex>
+                    <Image src={link.icon} w="14px" h="12px" alt="icon" mr="2.5px" />
+                    <Anchor href={link.href} target="_blank">
+                      {link.text}
+                    </Anchor>
+                  </Flex>
+                </List.Item>
               ))}
-            </ul>
+            </List>
           </Box>
         </Flex>
       </Box>
@@ -66,7 +77,7 @@ export const MainFormPage: FC = () => {
         <Divider my="md" />
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput
-            style={inputNumber}
+            mb="25px"
             label="Номер телефона"
             placeholder="+7 999 999-99-99"
             {...form.getInputProps('phone')}
