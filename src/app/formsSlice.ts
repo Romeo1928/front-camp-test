@@ -62,8 +62,6 @@ const formsSlice = createSlice({
     });
     builder.addCase(formATh.rejected, (state, action) => {
       state.isLoading = 'failed';
-      // debugger;
-      console.log('Error payload:', action.payload);
       state.error = action.payload as string;
       state.activeStep = StepActive.StepError;
     });

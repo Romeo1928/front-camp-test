@@ -60,7 +60,7 @@ export const MainFormPage: FC = () => {
                   }}
                   key={link.id}
                 >
-                  <Flex>
+                  <Flex justify="center" align="center">
                     <Image src={link.icon} w="14px" h="12px" alt="icon" mr="2.5px" />
                     <Anchor href={link.href} target="_blank">
                       {link.text}
